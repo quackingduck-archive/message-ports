@@ -1,0 +1,24 @@
+{ "name": "Plugs"
+, "description": "Sockets from the future. A friendly API over the node ZeroMQ (zmq) bindings"
+, "author": "Myles Byrne"
+, "version": "0.0.1"
+, "main": "./plugs.js"
+, "engines":
+  { "node": "~0.4"
+  }
+, "dependencies":
+  { "zmq": ">=1.0.2"
+  }
+, "devDependencies":
+  { "nodeunit": ">=0.5.0"
+  , "coffee-script": ">=1.1.1"
+  }
+, "repository":
+  { "type": "git"
+  , "url": "https://github.com/quackingduck/plugs.git"
+  }
+, "licenses": [
+  { "type": "MIT"
+  , "url": "https://github.com/quackingduck/plugs/raw/master/LICENSE"
+  }]
+}
