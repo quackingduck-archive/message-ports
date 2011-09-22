@@ -7,7 +7,7 @@ plug.messageFormat 'utf8'
 
 module.exports = testCase
 
-  "basic client server communication": (test) ->
+  "basic client server communication (like HTTP)": (test) ->
     test.expect 2
 
     plugPath = 'ipc:///tmp/test.plug'
@@ -22,7 +22,7 @@ module.exports = testCase
       test.equals msg, "good!"
       test.done()
 
-  "basic unidirectional messaging": (test) ->
+  "basic unidirectional messaging (like unix pipes)": (test) ->
     test.expect 1
 
     plugPath = 'ipc:///tmp/test.plug'
@@ -35,7 +35,7 @@ module.exports = testCase
     push = plug.push plugPath
     push 'hai'
 
-  "basic broadcast messaging": (test) ->
+  "basic broadcast messaging (like RSS)": (test) ->
     test.expect 1
 
     plugPath = 'ipc:///tmp/test.plug'

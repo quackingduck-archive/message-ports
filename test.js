@@ -4,7 +4,7 @@
   testCase = require('nodeunit').testCase;
   plug.messageFormat('utf8');
   module.exports = testCase({
-    "basic client server communication": function(test) {
+    "basic client server communication (like HTTP)": function(test) {
       var plugPath, reply, request;
       test.expect(2);
       plugPath = 'ipc:///tmp/test.plug';
@@ -19,7 +19,7 @@
         return test.done();
       });
     },
-    "basic unidirectional messaging": function(test) {
+    "basic unidirectional messaging (like unix pipes)": function(test) {
       var plugPath, pull, push;
       test.expect(1);
       plugPath = 'ipc:///tmp/test.plug';
@@ -31,7 +31,7 @@
       push = plug.push(plugPath);
       return push('hai');
     },
-    "basic broadcast messaging": function(test) {
+    "basic broadcast messaging (like RSS)": function(test) {
       var plugPath, publish, subscribe;
       test.expect(1);
       plugPath = 'ipc:///tmp/test.plug';
