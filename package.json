@@ -1,4 +1,4 @@
-{ "name": "Plugs"
+{ "name": "plugs"
 , "description": "Sockets from the future. A friendly API over the node ZeroMQ (zmq) bindings"
 , "author": "Myles Byrne"
 , "version": "0.0.1"
