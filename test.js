@@ -16,6 +16,8 @@
       request = plug.request(plugPath);
       return request("status?", function(msg) {
         test.equals(msg, "good!");
+        request.close();
+        reply.close();
         return test.done();
       });
     },
@@ -26,6 +28,8 @@
       pull = plug.pull(plugPath);
       pull(function(msg) {
         test.equal(msg, 'hai');
+        push.close();
+        pull.close();
         return test.done();
       });
       push = plug.push(plugPath);
@@ -37,13 +41,17 @@
       plugPath = 'ipc:///tmp/test.plug';
       subscribe = plug.subscribe(plugPath);
       subscribe(function(msg) {
-        test.equal(msg, 'broadcast');
-        return test.done();
+        return test.equal(msg, 'broadcast');
       });
       publish = plug.publish(plugPath);
-      return setTimeout(function() {
+      setTimeout(function() {
         return publish('broadcast');
-      }, 300);
+      }, 200);
+      return setTimeout(function() {
+        publish.close();
+        subscribe.close();
+        return test.done();
+      }, 210);
     }
   });
 }).call(this);

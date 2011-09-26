@@ -9,16 +9,6 @@ zmq = require 'zmq'
 messageFormat = 'binary'
 @messageFormat = (format) -> messageFormat = format
 
-parse = (buffer) ->
-  switch messageFormat
-    when 'utf8' then buffer.toString 'utf8'
-    else buffer
-
-serialize = (object) ->
-  switch messageFormat
-    when 'utf8' then new Buffer object
-    else object
-
 # Request/Reply Messaging
 
 @reply = (urls...) ->
@@ -27,15 +17,12 @@ serialize = (object) ->
     zmqSocket.bindSync url, (error) ->
       throw "can't bind to #{url}" if error?
 
-  responder = (msg) ->
+  send = (msg) ->
     zmqSocket.send serialize msg
 
-  goodSocket = (callback) ->
+  createPlug zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
-      callback parse(buffer), responder
-
-  goodSocket.socket = zmqSocket
-  goodSocket
+      callback parse(buffer), send
 
 # alias
 @rep = @reply
@@ -45,16 +32,14 @@ serialize = (object) ->
   for url in urls
     zmqSocket.connect url
 
-  goodSocket = (msg, callback) ->
+  createPlug zmqSocket, (msg, callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
     zmqSocket.send serialize msg
 
-  goodSocket.socket = zmqSocket
-  goodSocket
-
 # alias
 @req = @request
+
 
 # Unidirectional (Pipeline) Messaging
 
@@ -64,22 +49,17 @@ serialize = (object) ->
     zmqSocket.bindSync url, (error) ->
       throw "can't bind to #{url}" if error?
 
-  plug = (callback) ->
+  createPlug zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
-
-  plug.socket = zmqSocket
-  plug
 
 @push = (urls...) ->
   zmqSocket = zmq.createSocket 'push'
   zmqSocket.connect url for url in urls
 
-  plug = (msg) ->
+  createPlug zmqSocket, (msg) ->
     zmqSocket.send serialize msg
 
-  plug.socket = zmqSocket
-  plug
 
 # Publish/Subscribe Messaging
 
@@ -87,11 +67,8 @@ serialize = (object) ->
   zmqSocket = zmq.createSocket 'pub'
   zmqSocket.bindSync url for url in urls
 
-  plug = (msg) ->
+  createPlug zmqSocket, (msg) ->
     zmqSocket.send serialize msg
-
-  plug.socket = zmqSocket
-  plug
 
 @pub = @publish
 
@@ -101,11 +78,27 @@ serialize = (object) ->
   # subcribe to all messages (i.e. don't filter them based on a prefix)
   zmqSocket.subscribe ''
 
-  plug = (callback) ->
+  createPlug zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
 
-  plug.socket = zmqSocket
-  plug
-
 @sub = @subscribe
+
+# Implementation
+
+# Annotates the plug function `f` with a reference to the zmq socket and adds
+# a `close()` method
+createPlug = (zmqSocket, f) ->
+  f.socket = zmqSocket
+  f.close = -> zmqSocket.close()
+  f
+
+parse = (buffer) ->
+  switch messageFormat
+    when 'utf8' then buffer.toString 'utf8'
+    else buffer
+
+serialize = (object) ->
+  switch messageFormat
+    when 'utf8' then new Buffer object
+    else object

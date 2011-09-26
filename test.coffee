@@ -20,6 +20,9 @@ module.exports = testCase
     request = plug.request plugPath
     request "status?", (msg) ->
       test.equals msg, "good!"
+
+      request.close()
+      reply.close()
       test.done()
 
   "basic unidirectional messaging (like unix pipes)": (test) ->
@@ -30,6 +33,9 @@ module.exports = testCase
     pull = plug.pull plugPath
     pull (msg) ->
       test.equal msg, 'hai'
+
+      push.close()
+      pull.close()
       test.done()
 
     push = plug.push plugPath
@@ -43,7 +49,6 @@ module.exports = testCase
     subscribe = plug.subscribe plugPath
     subscribe (msg) ->
       test.equal msg, 'broadcast'
-      test.done()
 
     publish = plug.publish plugPath
 
@@ -52,4 +57,12 @@ module.exports = testCase
     # to ensure it's connected
     setTimeout ->
       publish 'broadcast'
-    , 300
+    , 200
+
+    # End the test regardless of if the subscriber managed to connect
+    setTimeout ->
+      publish.close()
+      subscribe.close()
+      test.done()
+    , 210
+
