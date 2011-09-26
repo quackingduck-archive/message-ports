@@ -6,8 +6,7 @@
 zmq = require 'zmq'
 
 # Binary is the default. Messages are passed to callbacks as Buffer objects
-messageFormat = 'binary'
-@messageFormat = (format) -> messageFormat = format
+@messageFormat = 'binary'
 
 # Request/Reply Messaging
 
@@ -93,12 +92,14 @@ createPlug = (zmqSocket, f) ->
   f.close = -> zmqSocket.close()
   f
 
-parse = (buffer) ->
-  switch messageFormat
+parse = (buffer) =>
+  switch @messageFormat
     when 'utf8' then buffer.toString 'utf8'
+    when 'json' then JSON.parse buffer.toString 'utf8'
     else buffer
 
-serialize = (object) ->
-  switch messageFormat
-    when 'utf8' then new Buffer object
+serialize = (object) =>
+  switch @messageFormat
+    when 'utf8' then new Buffer object, 'utf8'
+    when 'json' then JSON.stringify object, 'utf8'
     else object

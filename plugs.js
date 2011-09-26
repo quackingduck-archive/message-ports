@@ -1,11 +1,8 @@
 (function() {
-  var createPlug, messageFormat, parse, serialize, zmq;
-  var __slice = Array.prototype.slice;
+  var createPlug, parse, serialize, zmq;
+  var __slice = Array.prototype.slice, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   zmq = require('zmq');
-  messageFormat = 'binary';
-  this.messageFormat = function(format) {
-    return messageFormat = format;
-  };
+  this.messageFormat = 'binary';
   this.reply = function() {
     var send, url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -110,20 +107,24 @@
     };
     return f;
   };
-  parse = function(buffer) {
-    switch (messageFormat) {
+  parse = __bind(function(buffer) {
+    switch (this.messageFormat) {
       case 'utf8':
         return buffer.toString('utf8');
+      case 'json':
+        return JSON.parse(buffer.toString('utf8'));
       default:
         return buffer;
     }
-  };
-  serialize = function(object) {
-    switch (messageFormat) {
+  }, this);
+  serialize = __bind(function(object) {
+    switch (this.messageFormat) {
       case 'utf8':
-        return new Buffer(object);
+        return new Buffer(object, 'utf8');
+      case 'json':
+        return JSON.stringify(object, 'utf8');
       default:
         return object;
     }
-  };
+  }, this);
 }).call(this);

@@ -3,9 +3,12 @@
 plug       = require './'
 {testCase} = require 'nodeunit'
 
-plug.messageFormat 'utf8'
 
-module.exports = testCase
+@["Basic Usage"] = testCase
+
+  setUp: (proceed) ->
+    plug.messageFormat = 'utf8'
+    proceed()
 
   "basic client server communication (like HTTP)": (test) ->
     test.expect 2
@@ -14,12 +17,12 @@ module.exports = testCase
 
     reply = plug.reply plugPath
     reply (msg, send) ->
-      test.equals msg, "status?"
+      test.strictEqual msg, "status?"
       send "good!"
 
     request = plug.request plugPath
     request "status?", (msg) ->
-      test.equals msg, "good!"
+      test.strictEqual msg, "good!"
 
       request.close()
       reply.close()
@@ -32,7 +35,7 @@ module.exports = testCase
 
     pull = plug.pull plugPath
     pull (msg) ->
-      test.equal msg, 'hai'
+      test.strictEqual msg, 'hai'
 
       push.close()
       pull.close()
@@ -48,7 +51,7 @@ module.exports = testCase
 
     subscribe = plug.subscribe plugPath
     subscribe (msg) ->
-      test.equal msg, 'broadcast'
+      test.strictEqual msg, 'broadcast'
 
     publish = plug.publish plugPath
 
@@ -65,4 +68,27 @@ module.exports = testCase
       subscribe.close()
       test.done()
     , 210
+
+
+@["Message formatting"] = testCase
+
+  "JSON": (test) ->
+    test.expect 1
+
+    plugPath = 'ipc:///tmp/test-json.plug'
+
+    plug.messageFormat = 'json'
+
+    pull = plug.pull plugPath
+    pull (msg) ->
+      test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
+
+      push.close()
+      pull.close()
+      test.done()
+
+    push = plug.push plugPath
+    push { msg: 'hai', arr: [1,2,3] }
+
+
 
