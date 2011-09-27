@@ -44,9 +44,12 @@ messageFormat = 'binary'
   for url in urls
     zmqSocket.connect url
 
+  receive = null
+  zmqSocket.on 'message', (buffer) ->
+    receive parse(buffer)
+
   createMSocket zmqSocket, (msg, callback) ->
-    zmqSocket.on 'message', (buffer) ->
-      callback parse(buffer)
+    receive = callback
     zmqSocket.send serialize msg
 
 # alias

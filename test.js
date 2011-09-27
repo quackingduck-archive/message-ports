@@ -101,4 +101,30 @@
       });
     }
   });
+  this["req/rep"] = testCase({
+    setUp: function(proceed) {
+      ms.messageFormat = 'utf8';
+      return proceed();
+    },
+    "multiple requests": function(test) {
+      var msPath, reply, replyCount, request;
+      test.expect(2);
+      msPath = 'ipc:///tmp/test.ms';
+      replyCount = 0;
+      reply = ms.reply(msPath);
+      reply(function(msg, send) {
+        return send("good! " + (replyCount += 1));
+      });
+      request = ms.request(msPath);
+      return request("status?", function(msg) {
+        test.strictEqual(msg, "good! 1");
+        return request("status?", function(msg) {
+          test.strictEqual(msg, "good! 2");
+          request.close();
+          reply.close();
+          return test.done();
+        });
+      });
+    }
+  });
 }).call(this);

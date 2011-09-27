@@ -108,3 +108,34 @@ ms         = require './'
 
     push = ms.push msPath
     push { msg: 'hai', arr: [1,2,3] }
+
+
+@["req/rep"] = testCase
+
+  setUp: (proceed) ->
+    ms.messageFormat = 'utf8'
+    proceed()
+
+  "multiple requests": (test) ->
+    test.expect 2
+
+    msPath = 'ipc:///tmp/test.ms'
+
+    replyCount = 0
+
+    reply = ms.reply msPath
+    reply (msg, send) ->
+      send "good! #{replyCount+=1}"
+
+    request = ms.request msPath
+
+    # request 1
+    request "status?", (msg) ->
+      test.strictEqual msg, "good! 1"
+
+      request "status?", (msg) ->
+        test.strictEqual msg, "good! 2"
+
+        request.close()
+        reply.close()
+        test.done()

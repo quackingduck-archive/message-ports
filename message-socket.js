@@ -48,17 +48,19 @@
   };
   this.rep = this.reply;
   this.request = function() {
-    var url, urls, zmqSocket, _i, _len;
+    var receive, url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     zmqSocket = zmq.createSocket('req');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
       zmqSocket.connect(url);
     }
+    receive = null;
+    zmqSocket.on('message', function(buffer) {
+      return receive(parse(buffer));
+    });
     return createMSocket(zmqSocket, function(msg, callback) {
-      zmqSocket.on('message', function(buffer) {
-        return callback(parse(buffer));
-      });
+      receive = callback;
       return zmqSocket.send(serialize(msg));
     });
   };
