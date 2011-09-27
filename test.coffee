@@ -91,4 +91,20 @@ plug       = require './'
     push { msg: 'hai', arr: [1,2,3] }
 
 
+  "msgpack": (test) ->
+    test.expect 1
 
+    plugPath = 'ipc:///tmp/test-json.plug'
+
+    plug.messageFormat = 'msgpack'
+
+    pull = plug.pull plugPath
+    pull (msg) ->
+      test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
+
+      push.close()
+      pull.close()
+      test.done()
+
+    push = plug.push plugPath
+    push { msg: 'hai', arr: [1,2,3] }

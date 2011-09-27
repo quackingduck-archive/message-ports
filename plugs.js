@@ -1,8 +1,30 @@
 (function() {
-  var createPlug, parse, serialize, zmq;
-  var __slice = Array.prototype.slice, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var createPlug, messageFormat, parse, serialize, zmq;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __slice = Array.prototype.slice;
   zmq = require('zmq');
-  this.messageFormat = 'binary';
+  messageFormat = 'binary';
+  this.__defineSetter__('messageFormat', __bind(function(format) {
+    return messageFormat = (function() {
+      switch (format) {
+        case 'utf8':
+        case 'string':
+          return 'utf8';
+        case 'binary':
+          return format;
+        case 'json':
+        case 'JSON':
+          return 'json';
+        case 'msgpack':
+          this.msgpack = require('msgpack2');
+          return 'msgpack';
+        default:
+          throw new Error("unkown message format: " + format);
+      }
+    }).call(this);
+  }, this));
+  this.__defineGetter__('messageFormat', function() {
+    return messageFormat;
+  });
   this.reply = function() {
     var send, url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -113,6 +135,8 @@
         return buffer.toString('utf8');
       case 'json':
         return JSON.parse(buffer.toString('utf8'));
+      case 'msgpack':
+        return this.msgpack.unpack(buffer);
       default:
         return buffer;
     }
@@ -120,9 +144,11 @@
   serialize = __bind(function(object) {
     switch (this.messageFormat) {
       case 'utf8':
-        return new Buffer(object, 'utf8');
+        return new Buffer(object);
       case 'json':
-        return JSON.stringify(object, 'utf8');
+        return new Buffer(JSON.stringify(object));
+      case 'msgpack':
+        return this.msgpack.pack(object);
       default:
         return object;
     }

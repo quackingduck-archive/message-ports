@@ -78,6 +78,27 @@
         msg: 'hai',
         arr: [1, 2, 3]
       });
+    },
+    "msgpack": function(test) {
+      var plugPath, pull, push;
+      test.expect(1);
+      plugPath = 'ipc:///tmp/test-json.plug';
+      plug.messageFormat = 'msgpack';
+      pull = plug.pull(plugPath);
+      pull(function(msg) {
+        test.deepEqual(msg, {
+          msg: 'hai',
+          arr: [1, 2, 3]
+        });
+        push.close();
+        pull.close();
+        return test.done();
+      });
+      push = plug.push(plugPath);
+      return push({
+        msg: 'hai',
+        arr: [1, 2, 3]
+      });
     }
   });
 }).call(this);
