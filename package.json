@@ -1,7 +1,7 @@
 { "name": "message-socket"
 , "description": "Sockets from the future. A friendly API over the node ZeroMQ (zmq) bindings"
 , "author": "Myles Byrne"
-, "version": "0.0.3"
+, "version": "0.1.0"
 , "main": "./message-socket.js"
 , "engines":
   { "node": "~0.4"
@@ -15,10 +15,10 @@
   }
 , "repository":
   { "type": "git"
-  , "url": "https://github.com/quackingduck/plugs.git"
+  , "url": "https://github.com/quackingduck/message-socket.git"
   }
 , "licenses": [
   { "type": "MIT"
-  , "url": "https://github.com/quackingduck/plugs/raw/master/LICENSE"
+  , "url": "https://github.com/quackingduck/message-socket/raw/master/LICENSE"
   }]
 }
