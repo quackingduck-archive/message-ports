@@ -1,11 +1,12 @@
-# Plugs
-# =====
+# Message Sockets
+# ===============
 #
-# Plugs. They're sockets from the future.
+# Sockets from the future.
 
 zmq = require 'zmq'
 
-# Binary is the default. Messages are passed to callbacks as Buffer objects
+# Binary is the default serialization format. Messages are passed to callbacks
+# as `Buffer` objects
 messageFormat = 'binary'
 
 @__defineSetter__ 'messageFormat', (format) =>
@@ -31,7 +32,7 @@ messageFormat = 'binary'
   send = (msg) ->
     zmqSocket.send serialize msg
 
-  createPlug zmqSocket, (callback) ->
+  createMSocket zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer), send
 
@@ -43,7 +44,7 @@ messageFormat = 'binary'
   for url in urls
     zmqSocket.connect url
 
-  createPlug zmqSocket, (msg, callback) ->
+  createMSocket zmqSocket, (msg, callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
     zmqSocket.send serialize msg
@@ -60,7 +61,7 @@ messageFormat = 'binary'
     zmqSocket.bindSync url, (error) ->
       throw "can't bind to #{url}" if error?
 
-  createPlug zmqSocket, (callback) ->
+  createMSocket zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
 
@@ -68,7 +69,7 @@ messageFormat = 'binary'
   zmqSocket = zmq.createSocket 'push'
   zmqSocket.connect url for url in urls
 
-  createPlug zmqSocket, (msg) ->
+  createMSocket zmqSocket, (msg) ->
     zmqSocket.send serialize msg
 
 
@@ -78,7 +79,7 @@ messageFormat = 'binary'
   zmqSocket = zmq.createSocket 'pub'
   zmqSocket.bindSync url for url in urls
 
-  createPlug zmqSocket, (msg) ->
+  createMSocket zmqSocket, (msg) ->
     zmqSocket.send serialize msg
 
 @pub = @publish
@@ -89,7 +90,7 @@ messageFormat = 'binary'
   # subcribe to all messages (i.e. don't filter them based on a prefix)
   zmqSocket.subscribe ''
 
-  createPlug zmqSocket, (callback) ->
+  createMSocket zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
       callback parse(buffer)
 
@@ -97,9 +98,9 @@ messageFormat = 'binary'
 
 # Implementation
 
-# Annotates the plug function `f` with a reference to the zmq socket and adds
-# a `close()` method
-createPlug = (zmqSocket, f) ->
+# Annotates the function `f` with a reference to the zmq socket and adds a
+# `close()` method
+createMSocket = (zmqSocket, f) ->
   f.socket = zmqSocket
   f.close = -> zmqSocket.close()
   f

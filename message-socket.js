@@ -1,5 +1,5 @@
 (function() {
-  var createPlug, messageFormat, parse, serialize, zmq;
+  var createMSocket, messageFormat, parse, serialize, zmq;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __slice = Array.prototype.slice;
   zmq = require('zmq');
   messageFormat = 'binary';
@@ -40,7 +40,7 @@
     send = function(msg) {
       return zmqSocket.send(serialize(msg));
     };
-    return createPlug(zmqSocket, function(callback) {
+    return createMSocket(zmqSocket, function(callback) {
       return zmqSocket.on('message', function(buffer) {
         return callback(parse(buffer), send);
       });
@@ -55,7 +55,7 @@
       url = urls[_i];
       zmqSocket.connect(url);
     }
-    return createPlug(zmqSocket, function(msg, callback) {
+    return createMSocket(zmqSocket, function(msg, callback) {
       zmqSocket.on('message', function(buffer) {
         return callback(parse(buffer));
       });
@@ -75,7 +75,7 @@
         }
       });
     }
-    return createPlug(zmqSocket, function(callback) {
+    return createMSocket(zmqSocket, function(callback) {
       return zmqSocket.on('message', function(buffer) {
         return callback(parse(buffer));
       });
@@ -89,7 +89,7 @@
       url = urls[_i];
       zmqSocket.connect(url);
     }
-    return createPlug(zmqSocket, function(msg) {
+    return createMSocket(zmqSocket, function(msg) {
       return zmqSocket.send(serialize(msg));
     });
   };
@@ -101,7 +101,7 @@
       url = urls[_i];
       zmqSocket.bindSync(url);
     }
-    return createPlug(zmqSocket, function(msg) {
+    return createMSocket(zmqSocket, function(msg) {
       return zmqSocket.send(serialize(msg));
     });
   };
@@ -115,14 +115,14 @@
       zmqSocket.connect(url);
     }
     zmqSocket.subscribe('');
-    return createPlug(zmqSocket, function(callback) {
+    return createMSocket(zmqSocket, function(callback) {
       return zmqSocket.on('message', function(buffer) {
         return callback(parse(buffer));
       });
     });
   };
   this.sub = this.subscribe;
-  createPlug = function(zmqSocket, f) {
+  createMSocket = function(zmqSocket, f) {
     f.socket = zmqSocket;
     f.close = function() {
       return zmqSocket.close();

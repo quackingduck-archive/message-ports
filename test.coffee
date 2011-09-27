@@ -1,26 +1,26 @@
 ## Integration Tests
 
-plug       = require './'
+ms         = require './'
 {testCase} = require 'nodeunit'
 
 
 @["Basic Usage"] = testCase
 
   setUp: (proceed) ->
-    plug.messageFormat = 'utf8'
+    ms.messageFormat = 'utf8'
     proceed()
 
   "basic client server communication (like HTTP)": (test) ->
     test.expect 2
 
-    plugPath = 'ipc:///tmp/test.plug'
+    msPath = 'ipc:///tmp/test.ms'
 
-    reply = plug.reply plugPath
+    reply = ms.reply msPath
     reply (msg, send) ->
       test.strictEqual msg, "status?"
       send "good!"
 
-    request = plug.request plugPath
+    request = ms.request msPath
     request "status?", (msg) ->
       test.strictEqual msg, "good!"
 
@@ -31,9 +31,9 @@ plug       = require './'
   "basic unidirectional messaging (like unix pipes)": (test) ->
     test.expect 1
 
-    plugPath = 'ipc:///tmp/test.plug'
+    msPath = 'ipc:///tmp/test.ms'
 
-    pull = plug.pull plugPath
+    pull = ms.pull msPath
     pull (msg) ->
       test.strictEqual msg, 'hai'
 
@@ -41,19 +41,19 @@ plug       = require './'
       pull.close()
       test.done()
 
-    push = plug.push plugPath
+    push = ms.push msPath
     push 'hai'
 
   "basic broadcast messaging (like RSS)": (test) ->
     test.expect 1
 
-    plugPath = 'ipc:///tmp/test.plug'
+    msPath = 'ipc:///tmp/test.ms'
 
-    subscribe = plug.subscribe plugPath
+    subscribe = ms.subscribe msPath
     subscribe (msg) ->
       test.strictEqual msg, 'broadcast'
 
-    publish = plug.publish plugPath
+    publish = ms.publish msPath
 
     # Though the `subscribe` call returns straight away it actually takes a
     # while for a subscriber to connect to a publisher so we wait a little bit
@@ -75,11 +75,11 @@ plug       = require './'
   "JSON": (test) ->
     test.expect 1
 
-    plugPath = 'ipc:///tmp/test-json.plug'
+    msPath = 'ipc:///tmp/test-json.ms'
 
-    plug.messageFormat = 'json'
+    ms.messageFormat = 'json'
 
-    pull = plug.pull plugPath
+    pull = ms.pull msPath
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -87,18 +87,18 @@ plug       = require './'
       pull.close()
       test.done()
 
-    push = plug.push plugPath
+    push = ms.push msPath
     push { msg: 'hai', arr: [1,2,3] }
 
 
   "msgpack": (test) ->
     test.expect 1
 
-    plugPath = 'ipc:///tmp/test-json.plug'
+    msPath = 'ipc:///tmp/test-json.ms'
 
-    plug.messageFormat = 'msgpack'
+    ms.messageFormat = 'msgpack'
 
-    pull = plug.pull plugPath
+    pull = ms.pull msPath
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -106,5 +106,5 @@ plug       = require './'
       pull.close()
       test.done()
 
-    push = plug.push plugPath
+    push = ms.push msPath
     push { msg: 'hai', arr: [1,2,3] }

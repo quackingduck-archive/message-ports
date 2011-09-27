@@ -1,22 +1,22 @@
 (function() {
-  var plug, testCase;
-  plug = require('./');
+  var ms, testCase;
+  ms = require('./');
   testCase = require('nodeunit').testCase;
   this["Basic Usage"] = testCase({
     setUp: function(proceed) {
-      plug.messageFormat = 'utf8';
+      ms.messageFormat = 'utf8';
       return proceed();
     },
     "basic client server communication (like HTTP)": function(test) {
-      var plugPath, reply, request;
+      var msPath, reply, request;
       test.expect(2);
-      plugPath = 'ipc:///tmp/test.plug';
-      reply = plug.reply(plugPath);
+      msPath = 'ipc:///tmp/test.ms';
+      reply = ms.reply(msPath);
       reply(function(msg, send) {
         test.strictEqual(msg, "status?");
         return send("good!");
       });
-      request = plug.request(plugPath);
+      request = ms.request(msPath);
       return request("status?", function(msg) {
         test.strictEqual(msg, "good!");
         request.close();
@@ -25,28 +25,28 @@
       });
     },
     "basic unidirectional messaging (like unix pipes)": function(test) {
-      var plugPath, pull, push;
+      var msPath, pull, push;
       test.expect(1);
-      plugPath = 'ipc:///tmp/test.plug';
-      pull = plug.pull(plugPath);
+      msPath = 'ipc:///tmp/test.ms';
+      pull = ms.pull(msPath);
       pull(function(msg) {
         test.strictEqual(msg, 'hai');
         push.close();
         pull.close();
         return test.done();
       });
-      push = plug.push(plugPath);
+      push = ms.push(msPath);
       return push('hai');
     },
     "basic broadcast messaging (like RSS)": function(test) {
-      var plugPath, publish, subscribe;
+      var msPath, publish, subscribe;
       test.expect(1);
-      plugPath = 'ipc:///tmp/test.plug';
-      subscribe = plug.subscribe(plugPath);
+      msPath = 'ipc:///tmp/test.ms';
+      subscribe = ms.subscribe(msPath);
       subscribe(function(msg) {
         return test.strictEqual(msg, 'broadcast');
       });
-      publish = plug.publish(plugPath);
+      publish = ms.publish(msPath);
       setTimeout(function() {
         return publish('broadcast');
       }, 200);
@@ -59,11 +59,11 @@
   });
   this["Message formatting"] = testCase({
     "JSON": function(test) {
-      var plugPath, pull, push;
+      var msPath, pull, push;
       test.expect(1);
-      plugPath = 'ipc:///tmp/test-json.plug';
-      plug.messageFormat = 'json';
-      pull = plug.pull(plugPath);
+      msPath = 'ipc:///tmp/test-json.ms';
+      ms.messageFormat = 'json';
+      pull = ms.pull(msPath);
       pull(function(msg) {
         test.deepEqual(msg, {
           msg: 'hai',
@@ -73,18 +73,18 @@
         pull.close();
         return test.done();
       });
-      push = plug.push(plugPath);
+      push = ms.push(msPath);
       return push({
         msg: 'hai',
         arr: [1, 2, 3]
       });
     },
     "msgpack": function(test) {
-      var plugPath, pull, push;
+      var msPath, pull, push;
       test.expect(1);
-      plugPath = 'ipc:///tmp/test-json.plug';
-      plug.messageFormat = 'msgpack';
-      pull = plug.pull(plugPath);
+      msPath = 'ipc:///tmp/test-json.ms';
+      ms.messageFormat = 'msgpack';
+      pull = ms.pull(msPath);
       pull(function(msg) {
         test.deepEqual(msg, {
           msg: 'hai',
@@ -94,7 +94,7 @@
         pull.close();
         return test.done();
       });
-      push = plug.push(plugPath);
+      push = ms.push(msPath);
       return push({
         msg: 'hai',
         arr: [1, 2, 3]
