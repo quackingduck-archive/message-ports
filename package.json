@@ -1,7 +1,7 @@
 { "name": "message-socket"
 , "description": "Sockets from the future. A friendly API over the node ZeroMQ (zmq) bindings"
 , "author": "Myles Byrne"
-, "version": "0.1.0"
+, "version": "0.2.0"
 , "main": "./message-socket.js"
 , "engines":
   { "node": "~0.4"
