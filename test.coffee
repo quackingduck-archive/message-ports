@@ -13,14 +13,14 @@ ms         = require './'
   "basic client server communication (like HTTP)": (test) ->
     test.expect 2
 
-    msPath = 'ipc:///tmp/test.ms'
+    port = randomPort()
 
-    reply = ms.reply msPath
+    reply = ms.reply port
     reply (msg, send) ->
       test.strictEqual msg, "status?"
       send "good!"
 
-    request = ms.request msPath
+    request = ms.request port
     request "status?", (msg) ->
       test.strictEqual msg, "good!"
 
@@ -31,9 +31,9 @@ ms         = require './'
   "basic unidirectional messaging (like unix pipes)": (test) ->
     test.expect 1
 
-    msPath = 'ipc:///tmp/test.ms'
+    port = randomPort()
 
-    pull = ms.pull msPath
+    pull = ms.pull port
     pull (msg) ->
       test.strictEqual msg, 'hai'
 
@@ -41,19 +41,19 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push msPath
+    push = ms.push port
     push 'hai'
 
   "basic broadcast messaging (like RSS)": (test) ->
     test.expect 1
 
-    msPath = 'ipc:///tmp/test.ms'
+    port = randomPort()
 
-    subscribe = ms.subscribe msPath
+    subscribe = ms.subscribe port
     subscribe (msg) ->
       test.strictEqual msg, 'broadcast'
 
-    publish = ms.publish msPath
+    publish = ms.publish port
 
     # Though the `subscribe` call returns straight away it actually takes a
     # while for a subscriber to connect to a publisher so we wait a little bit
@@ -75,11 +75,11 @@ ms         = require './'
   "JSON": (test) ->
     test.expect 1
 
-    msPath = 'ipc:///tmp/test-json.ms'
+    port = randomPort()
 
     ms.messageFormat = 'json'
 
-    pull = ms.pull msPath
+    pull = ms.pull port
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -87,18 +87,18 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push msPath
+    push = ms.push port
     push { msg: 'hai', arr: [1,2,3] }
 
 
   "msgpack": (test) ->
     test.expect 1
 
-    msPath = 'ipc:///tmp/test-json.ms'
+    port = randomPort()
 
     ms.messageFormat = 'msgpack'
 
-    pull = ms.pull msPath
+    pull = ms.pull port
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -106,7 +106,7 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push msPath
+    push = ms.push port
     push { msg: 'hai', arr: [1,2,3] }
 
 
@@ -119,15 +119,15 @@ ms         = require './'
   "multiple requests": (test) ->
     test.expect 2
 
-    msPath = 'ipc:///tmp/test.ms'
+    port = randomPort()
 
     replyCount = 0
 
-    reply = ms.reply msPath
+    reply = ms.reply port
     reply (msg, send) ->
       send "good! #{replyCount+=1}"
 
-    request = ms.request msPath
+    request = ms.request port
 
     # request 1
     request "status?", (msg) ->
@@ -139,3 +139,16 @@ ms         = require './'
         request.close()
         reply.close()
         test.done()
+
+@["internals"] = testCase
+
+  "zmqUrls": (test) ->
+    test.expect 1
+    test.deepEqual(
+      ms._test.zmqUrls([2000,3000]),
+      ["tcp://127.0.0.1:2000", "tcp://127.0.0.1:3000"]
+    )
+    test.done()
+
+
+randomPort = -> Math.round(Math.random() * 10 + 2000)

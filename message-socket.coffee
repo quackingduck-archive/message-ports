@@ -24,6 +24,7 @@ messageFormat = 'binary'
 # Request/Reply Messaging
 
 @reply = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'rep'
   for url in urls
     zmqSocket.bindSync url, (error) ->
@@ -40,6 +41,7 @@ messageFormat = 'binary'
 @rep = @reply
 
 @request = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'req'
   for url in urls
     zmqSocket.connect url
@@ -59,6 +61,7 @@ messageFormat = 'binary'
 # Unidirectional (Pipeline) Messaging
 
 @pull = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'pull'
   for url in urls
     zmqSocket.bindSync url, (error) ->
@@ -69,6 +72,7 @@ messageFormat = 'binary'
       callback parse(buffer)
 
 @push = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'push'
   zmqSocket.connect url for url in urls
 
@@ -79,6 +83,7 @@ messageFormat = 'binary'
 # Publish/Subscribe Messaging
 
 @publish = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'pub'
   zmqSocket.bindSync url for url in urls
 
@@ -88,6 +93,7 @@ messageFormat = 'binary'
 @pub = @publish
 
 @subscribe = (urls...) ->
+  urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'sub'
   zmqSocket.connect url for url in urls
   # subcribe to all messages (i.e. don't filter them based on a prefix)
@@ -108,6 +114,13 @@ createMSocket = (zmqSocket, f) ->
   f.close = -> zmqSocket.close()
   f
 
+zmqUrls = (urls) ->
+  for url in urls
+    if typeof url is 'number'
+      "tcp://127.0.0.1:#{url}"
+    else
+      url
+
 parse = (buffer) =>
   switch @messageFormat
     when 'utf8' then buffer.toString 'utf8'
@@ -121,3 +134,5 @@ serialize = (object) =>
     when 'json' then new Buffer JSON.stringify(object)
     when 'msgpack' then @msgpack.pack object
     else object
+
+module.exports._test = {zmqUrls}

@@ -1,5 +1,5 @@
 (function() {
-  var ms, testCase;
+  var ms, randomPort, testCase;
   ms = require('./');
   testCase = require('nodeunit').testCase;
   this["Basic Usage"] = testCase({
@@ -8,15 +8,15 @@
       return proceed();
     },
     "basic client server communication (like HTTP)": function(test) {
-      var msPath, reply, request;
+      var port, reply, request;
       test.expect(2);
-      msPath = 'ipc:///tmp/test.ms';
-      reply = ms.reply(msPath);
+      port = randomPort();
+      reply = ms.reply(port);
       reply(function(msg, send) {
         test.strictEqual(msg, "status?");
         return send("good!");
       });
-      request = ms.request(msPath);
+      request = ms.request(port);
       return request("status?", function(msg) {
         test.strictEqual(msg, "good!");
         request.close();
@@ -25,28 +25,28 @@
       });
     },
     "basic unidirectional messaging (like unix pipes)": function(test) {
-      var msPath, pull, push;
+      var port, pull, push;
       test.expect(1);
-      msPath = 'ipc:///tmp/test.ms';
-      pull = ms.pull(msPath);
+      port = randomPort();
+      pull = ms.pull(port);
       pull(function(msg) {
         test.strictEqual(msg, 'hai');
         push.close();
         pull.close();
         return test.done();
       });
-      push = ms.push(msPath);
+      push = ms.push(port);
       return push('hai');
     },
     "basic broadcast messaging (like RSS)": function(test) {
-      var msPath, publish, subscribe;
+      var port, publish, subscribe;
       test.expect(1);
-      msPath = 'ipc:///tmp/test.ms';
-      subscribe = ms.subscribe(msPath);
+      port = randomPort();
+      subscribe = ms.subscribe(port);
       subscribe(function(msg) {
         return test.strictEqual(msg, 'broadcast');
       });
-      publish = ms.publish(msPath);
+      publish = ms.publish(port);
       setTimeout(function() {
         return publish('broadcast');
       }, 200);
@@ -59,11 +59,11 @@
   });
   this["Message formatting"] = testCase({
     "JSON": function(test) {
-      var msPath, pull, push;
+      var port, pull, push;
       test.expect(1);
-      msPath = 'ipc:///tmp/test-json.ms';
+      port = randomPort();
       ms.messageFormat = 'json';
-      pull = ms.pull(msPath);
+      pull = ms.pull(port);
       pull(function(msg) {
         test.deepEqual(msg, {
           msg: 'hai',
@@ -73,18 +73,18 @@
         pull.close();
         return test.done();
       });
-      push = ms.push(msPath);
+      push = ms.push(port);
       return push({
         msg: 'hai',
         arr: [1, 2, 3]
       });
     },
     "msgpack": function(test) {
-      var msPath, pull, push;
+      var port, pull, push;
       test.expect(1);
-      msPath = 'ipc:///tmp/test-json.ms';
+      port = randomPort();
       ms.messageFormat = 'msgpack';
-      pull = ms.pull(msPath);
+      pull = ms.pull(port);
       pull(function(msg) {
         test.deepEqual(msg, {
           msg: 'hai',
@@ -94,7 +94,7 @@
         pull.close();
         return test.done();
       });
-      push = ms.push(msPath);
+      push = ms.push(port);
       return push({
         msg: 'hai',
         arr: [1, 2, 3]
@@ -107,15 +107,15 @@
       return proceed();
     },
     "multiple requests": function(test) {
-      var msPath, reply, replyCount, request;
+      var port, reply, replyCount, request;
       test.expect(2);
-      msPath = 'ipc:///tmp/test.ms';
+      port = randomPort();
       replyCount = 0;
-      reply = ms.reply(msPath);
+      reply = ms.reply(port);
       reply(function(msg, send) {
         return send("good! " + (replyCount += 1));
       });
-      request = ms.request(msPath);
+      request = ms.request(port);
       return request("status?", function(msg) {
         test.strictEqual(msg, "good! 1");
         return request("status?", function(msg) {
@@ -127,4 +127,14 @@
       });
     }
   });
+  this["internals"] = testCase({
+    "zmqUrls": function(test) {
+      test.expect(1);
+      test.deepEqual(ms._test.zmqUrls([2000, 3000]), ["tcp://127.0.0.1:2000", "tcp://127.0.0.1:3000"]);
+      return test.done();
+    }
+  });
+  randomPort = function() {
+    return Math.round(Math.random() * 10 + 2000);
+  };
 }).call(this);

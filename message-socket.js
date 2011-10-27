@@ -1,5 +1,5 @@
 (function() {
-  var createMSocket, messageFormat, parse, serialize, zmq;
+  var createMSocket, messageFormat, parse, serialize, zmq, zmqUrls;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __slice = Array.prototype.slice;
   zmq = require('zmq');
   messageFormat = 'binary';
@@ -28,6 +28,7 @@
   this.reply = function() {
     var send, url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('rep');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -50,6 +51,7 @@
   this.request = function() {
     var receive, url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('req');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -68,6 +70,7 @@
   this.pull = function() {
     var url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('pull');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -86,6 +89,7 @@
   this.push = function() {
     var url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('push');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -98,6 +102,7 @@
   this.publish = function() {
     var url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('pub');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -111,6 +116,7 @@
   this.subscribe = function() {
     var url, urls, zmqSocket, _i, _len;
     urls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    urls = zmqUrls(urls);
     zmqSocket = zmq.createSocket('sub');
     for (_i = 0, _len = urls.length; _i < _len; _i++) {
       url = urls[_i];
@@ -130,6 +136,15 @@
       return zmqSocket.close();
     };
     return f;
+  };
+  zmqUrls = function(urls) {
+    var url, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = urls.length; _i < _len; _i++) {
+      url = urls[_i];
+      _results.push(typeof url === 'number' ? "tcp://127.0.0.1:" + url : url);
+    }
+    return _results;
   };
   parse = __bind(function(buffer) {
     switch (this.messageFormat) {
@@ -155,4 +170,7 @@
         return object;
     }
   }, this);
+  module.exports._test = {
+    zmqUrls: zmqUrls
+  };
 }).call(this);
