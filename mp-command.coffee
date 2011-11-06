@@ -11,7 +11,7 @@ run = (args) ->
     interactiveMode type, port
   else
     # todo: fancy command mode
-    exitWithErrorAndPrintUsage()
+    printUsageAndExitWithError()
 
 interactiveMode = (type, port) ->
   process.stdin.setEncoding 'utf8'
@@ -64,10 +64,28 @@ interactiveModes.request = (portNumber, messagePort, getLine) ->
 
 # --
 
+typeExp = /// ^
+  reply | rep |
+  request | req |
+  push |
+  pull |
+  publish | pub |
+  subscribe | sub
+$ ///
+portExp = /// ^ \d+ $ ///
+
 # todo
 validateType = (type) ->
+  unless typeExp.test type
+    console.log "#{type} isn't a valid message port type"
+    printUsageAndExitWithError()
+
 validatePort = (port) ->
-exitWithErrorAndPrintUsage = ->
+  unless portExp.test port
+    console.log "#{port} isn't a valid port number"
+    printUsageAndExitWithError()
+
+printUsageAndExitWithError = ->
   console.log "usage: mp reply 2000"
   process.exit 1
 
