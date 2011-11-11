@@ -69,25 +69,28 @@ im.req = (portNumber, messagePort, getLine) ->
 
   getMsgSendMsgWaitMsgRepeat()
 
-im.pull = (portNumber, messagePort) ->
-  pull = messagePort
-  im.info "started pull socket on port #{portNumber}"
-  pull (pushedMsg) ->
-    im.info "message received:"
-    im.received pushedMsg
+# pull/subscribe and push/publish have the same interfaces at this level
 
-im.push = (portNumber, messagePort, getLine) ->
-  push = messagePort
-  im.info "started push socket on port #{portNumber}"
-  getAndPushMsg = ->
-    getLine (line) ->
-      push line
-      im.info "message sent"
-      getAndPushMsg()
+for name, longName of { pull: 'pull', sub: 'subscribe' }
 
-  getAndPushMsg()
+  im[name] = (portNumber, messagePort) ->
+    im.info "started #{longName} socket on port #{portNumber}"
+    messagePort (msg) ->
+      im.info "message received:"
+      im.received msg
 
-# these arrows should be reversed
+for name, longName of { push: 'push', pub: 'publish' }
+
+  im[name] = (portNumber, messagePort, getLine) ->
+    im.info "started #{longName} socket on port #{portNumber}"
+    getAndSendMsg = ->
+      getLine (line) ->
+        messagePort line
+        im.info "message sent"
+        getAndSendMsg()
+
+    getAndSendMsg()
+
 im.info      = (msg) -> console.log '- ' + msg
 im.received  = (msg) -> console.log '> ' + msg
 
