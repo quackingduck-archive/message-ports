@@ -69,6 +69,24 @@ im.req = (portNumber, messagePort, getLine) ->
 
   start()
 
+im.pull = (portNumber, messagePort) ->
+  pull = messagePort
+  im.info "started pull socket on port #{portNumber}"
+  pull (pushedMsg) ->
+    im.info "message received:"
+    im.received pushedMsg
+
+im.push = (portNumber, messagePort, getLine) ->
+  push = messagePort
+  im.info "started push socket on port #{portNumber}"
+  getAndPushMsg = ->
+    getLine (line) ->
+      push line
+      im.info "message sent"
+      getAndPushMsg()
+
+  getAndPushMsg()
+
 # these arrows should be reversed
 im.info      = (msg) -> console.log '- ' + msg
 im.received  = (msg) -> console.log '> ' + msg
