@@ -3,6 +3,7 @@ mp = require './'
 # entry point
 run = (args) ->
   type = args.shift()
+  type = typeAliases[type] if typeAliases[type]?
   validateType type
   port = args.shift()
   validatePort port
@@ -12,6 +13,11 @@ run = (args) ->
   else
     # todo: fancy command mode
     printUsageAndExitWithError()
+
+# ## Interactive modes
+#
+# One per socket type. These modes allow the user to interact with the
+# different socket types from the commandline
 
 interactiveMode = (type, port) ->
   process.stdin.setEncoding 'utf8'
@@ -34,7 +40,7 @@ interactiveMode = (type, port) ->
 
 interactiveModes = {}
 
-interactiveModes.reply = (portNumber, messagePort, getLine) ->
+interactiveModes.rep = (portNumber, messagePort, getLine) ->
   reply = messagePort
   logInfo "started reply socket on port #{portNumber}"
   logInfo "waiting for request"
@@ -46,7 +52,7 @@ interactiveModes.reply = (portNumber, messagePort, getLine) ->
       logInfo "reply sent"
       logInfo "waiting for request"
 
-interactiveModes.request = (portNumber, messagePort, getLine) ->
+interactiveModes.req = (portNumber, messagePort, getLine) ->
   request = messagePort
   logInfo "started request socket on port #{portNumber}"
   # starts the request/response cycle
@@ -64,14 +70,10 @@ interactiveModes.request = (portNumber, messagePort, getLine) ->
 
 # --
 
-typeExp = /// ^
-  reply | rep |
-  request | req |
-  push |
-  pull |
-  publish | pub |
-  subscribe | sub
-$ ///
+typeAliases =
+  request: 'req', reply: 'rep', publish: 'pub', subscribe: 'sub'
+
+typeExp = /// ^ rep | req | push | pull | pub | sub $ ///
 portExp = /// ^ \d+ $ ///
 
 # todo
@@ -81,13 +83,19 @@ validateType = (type) ->
     printUsageAndExitWithError()
 
 validatePort = (port) ->
+  # todo: validate port in range
   unless portExp.test port
     console.log "#{port} isn't a valid port number"
     printUsageAndExitWithError()
 
 printUsageAndExitWithError = ->
-  console.log "usage: mp reply 2000"
+  console.log usage
   process.exit 1
+
+# todo: expand
+usage = """
+usage: mp reply 2000
+"""
 
 logInfo = (msg) -> console.log '- ' + msg
 # these arrows should be reversed
@@ -95,4 +103,5 @@ logReceived  = (msg) -> console.log '< ' + msg
 
 # --
 
+# poor mans bin file
 run process.argv[2..-1]
