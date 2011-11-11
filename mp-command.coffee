@@ -22,7 +22,7 @@ run = (args) ->
 interactiveMode = (type, port) ->
   process.stdin.setEncoding 'utf8'
   input = require('readline').createInterface process.stdin, process.stdout
-  input.setPrompt '> '
+  input.setPrompt '< '
 
   mp.messageFormat = 'utf8'
   messagePort = mp[type](port)
@@ -71,7 +71,7 @@ im.req = (portNumber, messagePort, getLine) ->
 
 # these arrows should be reversed
 im.info      = (msg) -> console.log '- ' + msg
-im.received  = (msg) -> console.log '< ' + msg
+im.received  = (msg) -> console.log '> ' + msg
 
 # --
 
