@@ -36,37 +36,42 @@ interactiveMode = (type, port) ->
     input.once 'line', callback
     input.prompt()
 
-  interactiveModes[type](port, messagePort, getLine)
+  interactiveMode[type](port, messagePort, getLine)
 
-interactiveModes = {}
+# this namespace is too long
+im = interactiveMode
 
-interactiveModes.rep = (portNumber, messagePort, getLine) ->
+im.rep = (portNumber, messagePort, getLine) ->
   reply = messagePort
-  logInfo "started reply socket on port #{portNumber}"
-  logInfo "waiting for request"
+  im.info "started reply socket on port #{portNumber}"
+  im.info "waiting for request"
   reply (msg, send) ->
-    logInfo "request received:"
-    logReceived msg
+    im.info "request received:"
+    im.received msg
     getLine (line) ->
       send line
-      logInfo "reply sent"
-      logInfo "waiting for request"
+      im.info "reply sent"
+      im.info "waiting for request"
 
-interactiveModes.req = (portNumber, messagePort, getLine) ->
+im.req = (portNumber, messagePort, getLine) ->
   request = messagePort
-  logInfo "started request socket on port #{portNumber}"
+  im.info "started request socket on port #{portNumber}"
   # starts the request/response cycle
   start = ->
     getLine (line) ->
       request line, (msg) ->
-        logInfo "reply received:"
-        logReceived msg
+        im.info "reply received:"
+        im.received msg
         start()
 
-      logInfo "request sent"
-      logInfo "waiting for reply"
+      im.info "request sent"
+      im.info "waiting for reply"
 
   start()
+
+# these arrows should be reversed
+im.info      = (msg) -> console.log '- ' + msg
+im.received  = (msg) -> console.log '< ' + msg
 
 # --
 
@@ -96,10 +101,6 @@ printUsageAndExitWithError = ->
 usage = """
 usage: mp reply 2000
 """
-
-logInfo = (msg) -> console.log '- ' + msg
-# these arrows should be reversed
-logReceived  = (msg) -> console.log '< ' + msg
 
 # --
 
