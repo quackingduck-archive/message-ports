@@ -45,9 +45,9 @@ im.rep = (portNumber, messagePort, getLine) ->
   reply = messagePort
   im.info "started reply socket on port #{portNumber}"
   im.info "waiting for request"
-  reply (msg, send) ->
+  reply (requestMsg, send) ->
     im.info "request received:"
-    im.received msg
+    im.received requestMsg
     getLine (line) ->
       send line
       im.info "reply sent"
@@ -59,9 +59,9 @@ im.req = (portNumber, messagePort, getLine) ->
   # starts the request/response cycle
   start = ->
     getLine (line) ->
-      request line, (msg) ->
+      request line, (replyMsg) ->
         im.info "reply received:"
-        im.received msg
+        im.received replyMsg
         start()
 
       im.info "request sent"
