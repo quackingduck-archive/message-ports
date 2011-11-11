@@ -57,17 +57,17 @@ im.req = (portNumber, messagePort, getLine) ->
   request = messagePort
   im.info "started request socket on port #{portNumber}"
   # starts the request/response cycle
-  start = ->
+  getMsgSendMsgWaitMsgRepeat = ->
     getLine (line) ->
       request line, (replyMsg) ->
         im.info "reply received:"
         im.received replyMsg
-        start()
+        getMsgSendMsgWaitMsgRepeat()
 
       im.info "request sent"
       im.info "waiting for reply"
 
-  start()
+  getMsgSendMsgWaitMsgRepeat()
 
 im.pull = (portNumber, messagePort) ->
   pull = messagePort
