@@ -16,10 +16,10 @@
   }
 , "repository":
   { "type": "git"
-  , "url": "https://github.com/quackingduck/message-socket.git"
+  , "url": "https://github.com/quackingduck/message-ports.git"
   }
 , "licenses": [
   { "type": "MIT"
-  , "url": "https://github.com/quackingduck/message-socket/raw/master/LICENSE"
+  , "url": "https://github.com/quackingduck/message-ports/raw/master/LICENSE"
   }]
 }
