@@ -8,7 +8,7 @@
     "node": "~0.4"
   },
   "dependencies": {
-    "zmq": ">=1.0.2"
+    "zmq": "1.0.2"
   },
   "devDependencies": {
     "nodeunit": ">=0.5.0",
