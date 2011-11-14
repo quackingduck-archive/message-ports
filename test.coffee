@@ -1,13 +1,13 @@
 ## Integration Tests
 
-ms         = require './'
+mp         = require './'
 {testCase} = require 'nodeunit'
 
 
 @["Basic Usage"] = testCase
 
   setUp: (proceed) ->
-    ms.messageFormat = 'utf8'
+    mp.messageFormat = 'utf8'
     proceed()
 
   "basic client server communication (like HTTP)": (test) ->
@@ -15,12 +15,12 @@ ms         = require './'
 
     port = randomPort()
 
-    reply = ms.reply port
+    reply = mp.reply port
     reply (msg, send) ->
       test.strictEqual msg, "status?"
       send "good!"
 
-    request = ms.request port
+    request = mp.request port
     request "status?", (msg) ->
       test.strictEqual msg, "good!"
 
@@ -33,7 +33,7 @@ ms         = require './'
 
     port = randomPort()
 
-    pull = ms.pull port
+    pull = mp.pull port
     pull (msg) ->
       test.strictEqual msg, 'hai'
 
@@ -41,7 +41,7 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push port
+    push = mp.push port
     push 'hai'
 
   "basic broadcast messaging (like RSS)": (test) ->
@@ -49,11 +49,11 @@ ms         = require './'
 
     port = randomPort()
 
-    subscribe = ms.subscribe port
+    subscribe = mp.subscribe port
     subscribe (msg) ->
       test.strictEqual msg, 'broadcast'
 
-    publish = ms.publish port
+    publish = mp.publish port
 
     # Though the `subscribe` call returns straight away it actually takes a
     # while for a subscriber to connect to a publisher so we wait a little bit
@@ -77,9 +77,9 @@ ms         = require './'
 
     port = randomPort()
 
-    ms.messageFormat = 'json'
+    mp.messageFormat = 'json'
 
-    pull = ms.pull port
+    pull = mp.pull port
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -87,18 +87,17 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push port
+    push = mp.push port
     push { msg: 'hai', arr: [1,2,3] }
-
 
   "msgpack": (test) ->
     test.expect 1
 
     port = randomPort()
 
-    ms.messageFormat = 'msgpack'
+    mp.messageFormat = 'msgpack'
 
-    pull = ms.pull port
+    pull = mp.pull port
     pull (msg) ->
       test.deepEqual msg, { msg: 'hai', arr: [1,2,3] }
 
@@ -106,14 +105,14 @@ ms         = require './'
       pull.close()
       test.done()
 
-    push = ms.push port
+    push = mp.push port
     push { msg: 'hai', arr: [1,2,3] }
 
 
 @["req/rep"] = testCase
 
   setUp: (proceed) ->
-    ms.messageFormat = 'utf8'
+    mp.messageFormat = 'utf8'
     proceed()
 
   "multiple requests": (test) ->
@@ -123,11 +122,11 @@ ms         = require './'
 
     replyCount = 0
 
-    reply = ms.reply port
+    reply = mp.reply port
     reply (msg, send) ->
       send "good! #{replyCount+=1}"
 
-    request = ms.request port
+    request = mp.request port
 
     # request 1
     request "status?", (msg) ->
@@ -145,7 +144,7 @@ ms         = require './'
   "zmqUrls": (test) ->
     test.expect 1
     test.deepEqual(
-      ms._test.zmqUrls([2000,3000]),
+      mp._test.zmqUrls([2000,3000]),
       ["tcp://127.0.0.1:2000", "tcp://127.0.0.1:3000"]
     )
     test.done()
