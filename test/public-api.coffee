@@ -1,6 +1,6 @@
 ## Integration Tests
 
-mp         = require './'
+mp         = require '../'
 {testCase} = require 'nodeunit'
 
 
