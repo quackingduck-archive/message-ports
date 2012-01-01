@@ -1,4 +1,4 @@
-mp         = require '../../'
+mp         = require '../../src/message-ports'
 {testCase} = require 'nodeunit'
 
 @["Message formatting"] = testCase
