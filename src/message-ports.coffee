@@ -4,6 +4,8 @@
 # Sockets from the future.
 
 zmq = require 'zmq'
+# c.f.: https://github.com/JustinTulloss/zeromq.node/issues/86
+zmq.createSocket = zmq.socket if zmq.socket?
 
 # Binary is the default serialization format. Messages are passed to callbacks
 # as `Buffer` objects
