@@ -20,3 +20,5 @@ mp         = require '../../src/message-ports'
 
     push = mp.push port
     push { msg: 'hai', arr: [1,2,3] }
+
+randomPort = -> Math.round(Math.random() * 10 + 2000)
