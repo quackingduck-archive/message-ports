@@ -116,12 +116,20 @@ createMSocket = (zmqSocket, f) ->
   f.close = -> zmqSocket.close()
   f
 
-zmqUrls = (urls) ->
-  for url in urls
-    if typeof url is 'number'
-      "tcp://127.0.0.1:#{url}"
-    else
-      url
+zmqUrls = (portIds) ->
+  zmqUrl portId for portId in portIds
+
+zmqUrl = (portId) ->
+  if typeof portId is 'string' and portId.match urlRegexp
+    portId
+  else if typeof portId is 'string' and portId[0] is '/'
+    "ipc://#{portId}"
+  else if typeof portId is 'number'
+    "tcp://127.0.0.1:#{portId}"
+  else
+    throw new Error "#{portId} isn't a valid message port"
+
+urlRegexp = /// ^ \w+ : //  ///
 
 parse = (buffer) =>
   switch @messageFormat
@@ -137,4 +145,4 @@ serialize = (object) =>
     when 'msgpack' then @msgpack.pack object
     else object
 
-module.exports._test = {zmqUrls}
+module.exports._test = {zmqUrl, zmqUrls}

@@ -121,14 +121,4 @@ mp         = require '../src/message-ports'
         reply.close()
         test.done()
 
-@["internals"] = testCase
-
-  "zmqUrls": (test) ->
-    test.expect 1
-    test.deepEqual(
-      mp._test.zmqUrls([2000,3000]),
-      ["tcp://127.0.0.1:2000", "tcp://127.0.0.1:3000"]
-    )
-    test.done()
-
 randomPort = -> Math.round(Math.random() * 10 + 2000)
