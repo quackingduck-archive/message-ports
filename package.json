@@ -2,7 +2,7 @@
   "name": "message-ports",
   "description": "Sockets from the future. A friendly API over the node ZeroMQ (zmq) bindings",
   "author": "Myles Byrne",
-  "version": "0.4.1",
+  "version": "0.4.2-dev",
   "main": "./lib/message-ports.js",
   "engines": {
     "node": ">=0.4"
