@@ -44,6 +44,28 @@ mp         = require '../src/message-ports'
     push = mp.push port
     push 'hai'
 
+  "basic round-robin messaging": (test) ->
+    test.expect 2
+
+    port = randomPort()
+
+    pull1 = mp.pull port
+    pull1 (msg) ->
+      test.strictEqual msg, 'hai1'
+
+    pull2 = mp.pull port
+    pull2 (msg) ->
+      test.strictEqual msg, 'hai2'
+
+      push.close()
+      pull1.close()
+      pull2.close()
+      test.done()
+
+    push = mp.push port
+    push 'hai2'
+    push 'hai1'
+
   "basic broadcast messaging (like RSS)": (test) ->
     test.expect 1
 
@@ -121,4 +143,4 @@ mp         = require '../src/message-ports'
         reply.close()
         test.done()
 
-randomPort = -> Math.round(Math.random() * 10 + 2000)
+randomPort = -> Math.round(Math.random() * 10 + 2100)

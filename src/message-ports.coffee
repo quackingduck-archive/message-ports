@@ -65,9 +65,7 @@ messageFormat = 'binary'
 @pull = (urls...) ->
   urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'pull'
-  for url in urls
-    zmqSocket.bindSync url, (error) ->
-      throw "can't bind to #{url}" if error?
+  zmqSocket.connect url for url in urls
 
   createMSocket zmqSocket, (callback) ->
     zmqSocket.on 'message', (buffer) ->
@@ -76,7 +74,9 @@ messageFormat = 'binary'
 @push = (urls...) ->
   urls = zmqUrls urls
   zmqSocket = zmq.createSocket 'push'
-  zmqSocket.connect url for url in urls
+  for url in urls
+    zmqSocket.bindSync url, (error) ->
+      throw "can't bind to #{url}" if error?
 
   createMSocket zmqSocket, (msg) ->
     zmqSocket.send serialize msg
