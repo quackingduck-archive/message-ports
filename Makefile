@@ -23,4 +23,9 @@ lib :
 lib/%.js : src/%.coffee
 	./node_modules/.bin/coffee --compile --lint --output lib $<
 
-.PHONY: test lib
+# ---
+
+tag:
+	git tag v`coffee -e "console.log JSON.parse(require('fs').readFileSync 'package.json').version"`
+
+.PHONY: test lib tag
